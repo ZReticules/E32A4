@@ -113,3 +113,4 @@ macro %generate_alu [name, opcode]{
 	sar, 15, \
 	sld, 16, \
 	srd, 17
+
