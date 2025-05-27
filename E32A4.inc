@@ -1,6 +1,6 @@
 format binary
 use32
-include "TOOLS\PreprocFunc.inc"
+; include "TOOLS\PreprocFunc.inc"
 
 FLAGS equ t s z o c p i u m
 	t = 0
