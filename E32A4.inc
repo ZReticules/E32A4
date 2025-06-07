@@ -136,7 +136,7 @@ macro %mem_ins result, opcode, is_load, arg1, arg2, arg3{
 		check_flag = flag
 		_arg1 equ dest
 	\}
-	result = (arg3 and 11111b) or (is_load shl 5) or (not_flag shl 6) or (check_flag shl 7) or (arg3 shr 5 shl 10) or (opcode shl 26)
+	result = (arg3 and 11111b) or (is_load shl 5) or (not_flag shl 6) or (check_flag shl 7) or (arg3 shr 5 shl 10) or (arg1 shl 16) or (arg2 shl 21) or (opcode shl 26)
 }
 
 macro memb arg1, arg2, arg3{
@@ -147,6 +147,7 @@ macro memb arg1, arg2, arg3{
 	match =store any, arg1\{
 		%mem_ins result, 18, 0, any, arg2, arg3
 	\}
+	dd result
 }
 
 macro memh arg1, arg2, arg3{
@@ -157,6 +158,7 @@ macro memh arg1, arg2, arg3{
 	match =store any, arg1\{
 		%mem_ins result, 19, 0, any, arg2, arg3
 	\}
+	dd result
 }
 
 macro mem arg1, arg2, arg3{
@@ -167,4 +169,5 @@ macro mem arg1, arg2, arg3{
 	match =store any, arg1\{
 		%mem_ins result, 20, 0, any, arg2, arg3
 	\}
+	dd result
 }
