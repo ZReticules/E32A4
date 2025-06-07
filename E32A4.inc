@@ -1,21 +1,24 @@
 format binary
 use32
-; include "TOOLS\PreprocFunc.inc"
+include "TOOLS\PreprocFunc.inc"
 
 FLAGS equ t s z o c p i u m
-	t = 0
-	s = 1
-	z = 2
-	o = 3
-	c = 4
-	p = 5
-	i = 6
-	u = 7
-	m = 8
+	virtual at 0
+		t rb 1
+		s rb 1
+		z rb 1
+		o rb 1
+		c rb 1
+		p rb 1
+		i rb 1
+		u rb 1
+		m rb 1
+	end virtual
 
+virtual at 0
 rept 32 cntr:0{
 	forward
-	_r#cntr = cntr
+	_r#cntr rb 1
 	r#cntr equ _r#cntr
 	REGS equ _r#cntr
 	common
@@ -24,6 +27,7 @@ rept 32 cntr:0{
 		REGS equ regs
 	\}
 }
+end virtual
 
 macro %is_reg result, arg{
 	result equ 0
@@ -84,12 +88,14 @@ macro %generate_alu [name, opcode]{
 		\local _opcode
 		%alu_ins _opcode, opcode, 0, args
 		; %display_num _opcode, 16
+		; display 0xA
 		dd _opcode
 	\}
 	macro !#name args&\{
 		\local _opcode
 		%alu_ins _opcode, opcode, 1024, args
 		; %display_num _opcode, 16
+		; display 0xA
 		dd _opcode
 	\}
 }
@@ -114,3 +120,51 @@ macro %generate_alu [name, opcode]{
 	sld, 16, \
 	srd, 17
 
+macro %mem_ins result, opcode, is_load, arg1, arg2, arg3{
+	if (arg3 >= 1 shl 10) | (arg3 <= -1 shl 10)
+		\Offset is too big
+	end if
+	local not_flag, check_flag, _arg1
+	check_flag = t
+	not_flag = 0
+	_arg1 equ arg1
+	match ~flag dest, arg1\{
+		not_flag = 1
+		check_flag = flag
+		_arg1 equ dest
+	rept 0\{\} match flag dest, arg1\{
+		check_flag = flag
+		_arg1 equ dest
+	\}
+	result = (arg3 and 11111b) or (is_load shl 5) or (not_flag shl 6) or (check_flag shl 7) or (arg3 shr 5 shl 10) or (opcode shl 26)
+}
+
+macro memb arg1, arg2, arg3{
+	local result
+	match =load any, arg1\{
+		%mem_ins result, 18, 1, any, arg2, arg3
+	\}
+	match =store any, arg1\{
+		%mem_ins result, 18, 0, any, arg2, arg3
+	\}
+}
+
+macro memh arg1, arg2, arg3{
+	local result
+	match =load any, arg1\{
+		%mem_ins result, 19, 1, any, arg2, arg3
+	\}
+	match =store any, arg1\{
+		%mem_ins result, 19, 0, any, arg2, arg3
+	\}
+}
+
+macro mem arg1, arg2, arg3{
+	local result
+	match =load any, arg1\{
+		%mem_ins result, 20, 1, any, arg2, arg3
+	\}
+	match =store any, arg1\{
+		%mem_ins result, 20, 0, any, arg2, arg3
+	\}
+}
